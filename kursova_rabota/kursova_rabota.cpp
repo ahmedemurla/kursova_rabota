@@ -13,7 +13,6 @@ class Tehnika
 public:
 	virtual void viewTehnika() = 0;
 	virtual string accessData() = 0;
-	virtual string accessName() = 0;
 	
 	int getId() const 
 	{
@@ -54,17 +53,12 @@ public:
 
 	virtual void viewTehnika()
 	{
-		cout << left << setw(8) << part << speed << setw(8) << " GHz" << cores << setw(8) << " Cores" << price << " lv." << endl;
+		cout << right << setw(6) << part << setw(6) << speed << " GHz" << setw(6) << cores << " Cores" << setw(6)<< price << " lv." << endl;
 	}
 
 	virtual string accessData()
 	{
 		return file_path;
-	}
-	
-	virtual string accessName()
-	{
-		return part;
 	}
 
 private:
@@ -108,11 +102,6 @@ public:
 	virtual string accessData()
 	{
 		return file_path;
-	}
-	
-	virtual string accessName()
-	{
-		return part;
 	}
 
 private:
@@ -158,11 +147,6 @@ public:
 	virtual string accessData()
 	{
 		return file_path;
-	}
-	
-	virtual string accessName()
-	{
-		return part;
 	}
 
 private:
@@ -258,16 +242,15 @@ private:
 	vector<Tehnika*> tech_list;
 };
 
-int main()
+editTehnika fetch_data(editTehnika object)
 {
 	//Това вмъква информацията записана на файл в програмата//
 
 	string processor_data = "d:\\data\\processor_info.txt"; string graphics_data = "d:\\data\\graphics_info.txt"; string mobo_data = "d:\\data\\mobo_info.txt";
 	string psu_data = "d:\\data\\psu_info.txt"; string storage_data = "d:\\data\\storage_info.txt"; string memory_data = "d:\\data\\memory_info.txt";
-	vector<string> data{processor_data, graphics_data, mobo_data, psu_data, storage_data, memory_data};
-	
+	vector<string> data{ processor_data, graphics_data, mobo_data, psu_data, storage_data, memory_data };
+
 	fstream read_file;
-	editTehnika os;
 
 	for (int i = 0; i < data.size(); i++)
 	{
@@ -275,7 +258,7 @@ int main()
 
 		read_file.open(data[i]);
 
-		if ((read_file.is_open()) && (i==0))
+		if ((read_file.is_open()) && (i == 0))
 		{
 			while (!read_file.eof())
 			{
@@ -287,17 +270,15 @@ int main()
 
 				getline(read_file, name, '\t');
 
-				if (name == "\n") break;
+				if (name == "") break;
 
 				read_file >> speed >> cores >> price;
+				read_file.ignore(10, '\n');
 
-				size_t found = name.find('\n');
-				if(found == 0) name.erase(0, 1);
-
-				os.Add(new Processor(name, speed, cores, price, true));
+				object.Add(new Processor(name, speed, cores, price, true));
 			}
 		}
-		
+
 		else if ((read_file.is_open()) && (i == 1))
 		{
 			while (!read_file.eof())
@@ -307,14 +288,12 @@ int main()
 
 				getline(read_file, name, '\t');
 
-				if (name == "\n") break;
+				if (name == "") break;
 
 				read_file >> speed >> memory >> price;
+				read_file.ignore(10, '\n');
 
-				size_t found = name.find('\n');
-				if (found == 0) name.erase(0, 1);
-
-				os.Add(new GraphicsCard(name, speed, memory, price, true));
+				object.Add(new GraphicsCard(name, speed, memory, price, true));
 			}
 		}
 		else if ((read_file.is_open()) && (i == 2))
@@ -325,22 +304,29 @@ int main()
 
 				getline(read_file, name, '\t');
 
-				if (name == "\n") break;
+				if (name == "") break;
 				getline(read_file, socket, '\t');
 				getline(read_file, chipset, '\t');
 				getline(read_file, memory_type, '\t');
 				getline(read_file, form_factor, '\t');
 				read_file >> price;
+				read_file.ignore(10, '\n');
 
-				size_t found = name.find('\n');
-				if (found == 0) name.erase(0, 1);
-
-				os.Add(new Motherboard(name, socket, chipset, memory_type, form_factor, price, true));
+				object.Add(new Motherboard(name, socket, chipset, memory_type, form_factor, price, true));
 			}
 		}
 
 		read_file.close();
 	}
+
+	return object;
+}
+
+int main()
+{
+	editTehnika os;
+
+	os = fetch_data(os);
 	
 	while (true)
 	{
