@@ -13,8 +13,14 @@ class Tehnika
 public:
 	virtual void viewTehnika() = 0;
 	virtual string accessData() = 0;
+	
+	int getId() const 
+	{
+		return id;
+	}
 
 protected:
+	int id;
 	string part;
 	double price;
 };
@@ -25,6 +31,7 @@ public:
 
 	Processor(string name, double s, int c, double p, bool already_added = false)
 	{
+		id = nextId++;
 		part = name;
 		speed = s;
 		cores = c;
@@ -34,7 +41,7 @@ public:
 		{
 			processor_info.open(file_path, fstream::app);
 
-			processor_info << part << '\t' << speed << '\t' << cores << '\t' << price;
+			processor_info << part << '\t' << speed << '\t' << cores << '\t' << price << endl;
 
 			processor_info.close();
 		}
@@ -46,7 +53,7 @@ public:
 
 	virtual void viewTehnika()
 	{
-		cout << right << part << setw(10) << speed << " GHz" << setw(10) << cores << " Cores" << setw(10) << price << " lv." << endl;
+		cout << right << setw(6) << part << setw(6) << speed << " GHz" << setw(6) << cores << " Cores" << setw(6)<< price << " lv." << endl;
 	}
 
 	virtual string accessData()
@@ -55,10 +62,102 @@ public:
 	}
 
 private:
+	static int nextId;
 	string part; double speed, price; int cores;
 	string file_path = "d:\\data\\processor_info.txt";
 	fstream processor_info;
 };
+
+int Processor::nextId = 1;
+
+class GraphicsCard :public Tehnika
+{
+public:
+
+	GraphicsCard(string name, double s, int m, double p, bool already_added = false)
+	{
+		id = nextId++;
+		part = name;
+		speed = s;
+		memory = m;
+		price = p;
+
+		if (!already_added)
+		{
+			graphics_info.open(file_path, fstream::app);
+
+			graphics_info << part << '\t' << speed << '\t' << memory << '\t' << price << endl;
+
+			graphics_info.close();
+		}
+	}
+
+	~GraphicsCard() { };
+
+	virtual void viewTehnika()
+	{
+		cout << right << part << setw(10) << speed << " GHz" << setw(8) << memory << " GB" << setw(8) << price << " lv." << endl;
+	}
+
+	virtual string accessData()
+	{
+		return file_path;
+	}
+
+private:
+	static int nextId;
+	string part; double speed, price; int memory;
+	string file_path = "d:\\data\\graphics_info.txt";
+	fstream graphics_info;
+};
+
+int GraphicsCard::nextId = 1;
+
+class Motherboard:public Tehnika
+{
+public:
+
+	Motherboard(string name, string s, string c, string m, string f, double p, bool already_added = false)
+	{
+		id = nextId++;
+		part = name;
+		socket = s;
+		chipset = c;
+		memory_type = m;
+		form_factor = f;
+		price = p;
+
+		if (!already_added)
+		{
+			mobo_info.open(file_path, fstream::app);
+
+			mobo_info << part << '\t' << socket << '\t' << chipset << '\t' << memory_type << '\t' << form_factor << '\t' << price << endl;
+
+			mobo_info.close();
+		}
+	}
+
+	~Motherboard() { };
+
+	virtual void viewTehnika()
+	{
+		cout << right << part << setw(12) << socket << " Socket" << setw(12) << chipset << " Chipset" << setw(12) << memory_type << " Memory" << setw(12) << "Size: " << form_factor << setw(12) << price << " lv." << endl;
+	}
+
+	virtual string accessData()
+	{
+		return file_path;
+	}
+
+private:
+	static int nextId;
+	string part, socket, chipset, memory_type, form_factor;
+	double price;
+	string file_path = "d:\\data\\mobo_info.txt";
+	fstream mobo_info;
+};
+
+int Motherboard::nextId = 1;
 
 class editTehnika
 {
@@ -75,7 +174,7 @@ public:
 	void Remove()
 	{
 
-		int choice;
+		int choice, id;
 		string line, file_path;
 		vector <string> lines;
 		fstream read_file;
@@ -97,6 +196,8 @@ public:
 		//Тука махаме го от вектора, който ги съхранява.//
 
 		file_path = tech_list[choice]->accessData();
+		id = tech_list[choice]->getId();
+		id--;
 
 		tech_list.erase(tech_list.begin() + (choice));
 
@@ -118,7 +219,7 @@ public:
 
 		for (int i = 0; i < lines.size(); i++)
 		{
-			if (i != choice)
+			if (i != id)
 			{
 				write_file << lines[i] << endl;
 			}
@@ -141,37 +242,97 @@ private:
 	vector<Tehnika*> tech_list;
 };
 
-int main()
+editTehnika fetch_data(editTehnika object)
 {
 	//Това вмъква информацията записана на файл в програмата//
 
-	string processor_data = "d:\\data\\processor_info.txt"; fstream read_file;
-	editTehnika os;
-	string line;
-	read_file.open(processor_data);
+	string processor_data = "d:\\data\\processor_info.txt"; string graphics_data = "d:\\data\\graphics_info.txt"; string mobo_data = "d:\\data\\mobo_info.txt";
+	string psu_data = "d:\\data\\psu_info.txt"; string storage_data = "d:\\data\\storage_info.txt"; string memory_data = "d:\\data\\memory_info.txt";
+	vector<string> data{ processor_data, graphics_data, mobo_data, psu_data, storage_data, memory_data };
 
-	if (read_file.is_open())
+	fstream read_file;
+
+	for (int i = 0; i < data.size(); i++)
 	{
-		while (!read_file.eof())
+		string name; double price;
+
+		read_file.open(data[i]);
+
+		if ((read_file.is_open()) && (i == 0))
 		{
-			string name;
-			double speed, price;
-			int cores;
+			while (!read_file.eof())
+			{
 
-			getline(read_file, name, '\t');
-			read_file >> speed >> cores >> price;
+				double speed;
+				int cores;
 
-			os.Add(new Processor(name, speed, cores, price, true));
+				//Поради начина, по който съм правил трябва да се провери дали следващия ред е празен и ако е да се пропусне//
+
+				getline(read_file, name, '\t');
+
+				if (name == "") break;
+
+				read_file >> speed >> cores >> price;
+				read_file.ignore(10, '\n');
+
+				object.Add(new Processor(name, speed, cores, price, true));
+			}
+		}
+
+		else if ((read_file.is_open()) && (i == 1))
+		{
+			while (!read_file.eof())
+			{
+				double speed;
+				int memory;
+
+				getline(read_file, name, '\t');
+
+				if (name == "") break;
+
+				read_file >> speed >> memory >> price;
+				read_file.ignore(10, '\n');
+
+				object.Add(new GraphicsCard(name, speed, memory, price, true));
+			}
+		}
+		else if ((read_file.is_open()) && (i == 2))
+		{
+			while (!read_file.eof())
+			{
+				string socket, chipset, memory_type, form_factor;
+
+				getline(read_file, name, '\t');
+
+				if (name == "") break;
+				getline(read_file, socket, '\t');
+				getline(read_file, chipset, '\t');
+				getline(read_file, memory_type, '\t');
+				getline(read_file, form_factor, '\t');
+				read_file >> price;
+				read_file.ignore(10, '\n');
+
+				object.Add(new Motherboard(name, socket, chipset, memory_type, form_factor, price, true));
+			}
 		}
 
 		read_file.close();
 	}
 
+	return object;
+}
+
+int main()
+{
+	editTehnika os;
+
+	os = fetch_data(os);
+	
 	while (true)
 	{
 		int choice;
 
-		cout << "Kakvo iskash da napravish?" << endl;;
+		cout << "<===============MAIN MENU===============>" << endl;;
 		cout << "1. Dobavi produkt.\n2. Mahni produkt\n3. Viz spisaka za produkti.\n";
 
 		cin >> choice;
@@ -179,7 +340,7 @@ int main()
 		if (choice == 1)
 		{
 			cout << "Kakiv produkt iskash da dobavish?" << endl;
-			cout << "1. Processor\n";
+			cout << "1. Processor\n2.Video karta\n3.Dinna platka\n";
 			cin >> choice;
 			cin.ignore();
 
@@ -195,6 +356,35 @@ int main()
 				cout << "Cena: "; cin >> price;
 
 				os.Add(new Processor(name, speed, cores, price));
+			}
+
+			else if (choice == 2)
+			{
+				string name;
+				double speed, price;
+				int memory;
+
+				cout << "Ime: "; getline(cin, name);
+				cout << "Skorost: "; cin >> speed;
+				cout << "Pamet: "; cin >> memory;
+				cout << "Cena: "; cin >> price;
+
+				os.Add(new GraphicsCard(name, speed, memory, price));
+			}
+			
+			else if (choice == 3)
+			{
+				string name, socket, chipset, memory_type, form_factor;
+				double price;
+
+				cout << "Ime: "; getline(cin, name);
+				cout << "Soket: "; getline(cin, socket);
+				cout << "Chipset: "; getline(cin, chipset);
+				cout << "Vid pamet: "; getline(cin, memory_type);
+				cout << "Razmer: "; getline(cin, form_factor);
+				cout << "Cena: "; cin >> price;
+
+				os.Add(new Motherboard(name, socket, chipset, memory_type, form_factor, price));
 			}
 		}
 		else if (choice == 2)
