@@ -180,52 +180,61 @@ public:
 		fstream read_file;
 		ofstream write_file;
 
-		cout << "Kakvo iskash da mahnesh ot bazata za danni?" << endl;
-
-		//Тука нареждаме всичките компоненти, които сме добавили чрез програмата.//
-
-		for (int i = 0; i < tech_list.size(); i++)
+		if (tech_list.empty())
 		{
-			cout << i + 1 << ". ";
-			tech_list[i]->viewTehnika();
+			cout << "Nqma produkti za mahane." << endl;
 		}
 
-		cin >> choice;
-		choice--;
-
-		//Тука махаме го от вектора, който ги съхранява.//
-
-		file_path = tech_list[choice]->accessData();
-		id = tech_list[choice]->getId();
-		id--;
-
-		tech_list.erase(tech_list.begin() + (choice));
-
-		/*А тази част е за да ги махмет от файла, на които са записани.
-		Първо четем всеки ред и ги записваме в нов вектор.*/
-
-		read_file.open(file_path);
-
-		while (getline(read_file, line))
+		else
 		{
-			lines.push_back(line);
-		}
+			cout << "Kakvo iskash da mahnesh ot bazata za danni?" << endl;
 
-		read_file.close();
+			//Тука нареждаме всичките компоненти, които сме добавили чрез програмата.//
 
-		//После четем този нов вектор и записваме всичко, който не е този елемент, които току що махнаме, в файла пак.//
-
-		write_file.open(file_path);
-
-		for (int i = 0; i < lines.size(); i++)
-		{
-			if (i != id)
+			for (int i = 0; i < tech_list.size(); i++)
 			{
-				write_file << lines[i] << endl;
+				cout << i + 1 << ". ";
+				tech_list[i]->viewTehnika();
 			}
+
+			cin >> choice;
+			choice--;
+
+			//Тука махаме го от вектора, който ги съхранява.//
+
+			file_path = tech_list[choice]->accessData();
+			id = tech_list[choice]->getId();
+			id--;
+
+			tech_list.erase(tech_list.begin() + (choice));
+
+			/*А тази част е за да ги махмет от файла, на които са записани.
+			Първо четем всеки ред и ги записваме в нов вектор.*/
+
+			read_file.open(file_path);
+
+			while (getline(read_file, line))
+			{
+				lines.push_back(line);
+			}
+
+			read_file.close();
+
+			//После четем този нов вектор и записваме всичко, който не е този елемент, които току що махнаме, в файла пак.//
+
+			write_file.open(file_path);
+
+			for (int i = 0; i < lines.size(); i++)
+			{
+				if (i != id)
+				{
+					write_file << lines[i] << endl;
+				}
+			}
+
+			write_file.close();
 		}
 
-		write_file.close();
 	}
 
 	//Нарежда всики добавени компоненти//
@@ -333,7 +342,7 @@ int main()
 		int choice;
 
 		cout << "<===============MAIN MENU===============>" << endl;;
-		cout << "1. Dobavi produkt.\n2. Mahni produkt\n3. Viz spisaka za produkti.\n";
+		cout << "1. Dobavi produkt.\n2. Mahni produkt\n3. Viz spisaka za produkti.\n0. Izlez ot programata\n";
 
 		cin >> choice;
 
