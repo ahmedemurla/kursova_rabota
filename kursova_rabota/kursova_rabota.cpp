@@ -1,20 +1,21 @@
 ﻿#include <iostream>
-#include <vector>
 #include <string>
+#include <vector>
 #include <fstream>
+#include <algorithm>
 #include <iomanip>
 
 using namespace std;
 
-//Това е абстрактният клас за всички видове комп. техника//
 
 class Tehnika
 {
 public:
 	virtual void viewTehnika() = 0;
 	virtual string accessData() = 0;
-	
-	int getId() const 
+	virtual double getPrice() = 0;
+
+	int getId() const
 	{
 		return id;
 	}
@@ -53,12 +54,17 @@ public:
 
 	virtual void viewTehnika()
 	{
-		cout << right << setw(6) << part << setw(6) << speed << " GHz" << setw(6) << cores << " Cores" << setw(6)<< price << " lv." << endl;
+		cout << right << setw(6) << part << setw(6) << speed << " GHz" << setw(6) << cores << " Cores" << setw(6) << price << " lv." << endl;
 	}
 
 	virtual string accessData()
 	{
 		return file_path;
+	}
+
+	virtual double getPrice()
+	{
+		return price;
 	}
 
 private:
@@ -104,6 +110,12 @@ public:
 		return file_path;
 	}
 
+	virtual double getPrice()
+	{
+		return price;
+	}
+
+
 private:
 	static int nextId;
 	string part; double speed, price; int memory;
@@ -113,7 +125,7 @@ private:
 
 int GraphicsCard::nextId = 1;
 
-class Motherboard:public Tehnika
+class Motherboard :public Tehnika
 {
 public:
 
@@ -149,6 +161,12 @@ public:
 		return file_path;
 	}
 
+	virtual double getPrice()
+	{
+		return price;
+	}
+
+
 private:
 	static int nextId;
 	string part, socket, chipset, memory_type, form_factor;
@@ -162,6 +180,8 @@ int Motherboard::nextId = 1;
 class editTehnika
 {
 public:
+	vector<Tehnika*> tech_list;
+
 	editTehnika() {};
 	~editTehnika() {};
 
@@ -248,7 +268,6 @@ public:
 		}
 	}
 private:
-	vector<Tehnika*> tech_list;
 };
 
 editTehnika fetch_data(editTehnika object)
@@ -331,81 +350,278 @@ editTehnika fetch_data(editTehnika object)
 	return object;
 }
 
-int main()
+class Klienti
 {
-	editTehnika os;
+public:
 
-	os = fetch_data(os);
-	
-	while (true)
+	vector <Tehnika*> koshnitsa;
+
+	Klienti(string name, int p, string e, string c, bool already_added = false)
+	{
+		id = nextId++;
+		part = name;
+		phone = p;
+		email = e;
+		city = c;
+
+		if (!already_added)
+		{
+			Klienti_Info.open(file_path, fstream::app);
+
+			Klienti_Info << part << '\t' << phone << '\t' << email << '\t' << city << endl;
+
+			Klienti_Info.close();
+		}
+	}
+
+	~Klienti() { };
+
+	void view()
+	{
+		cout << "Name: " << part << '\t' << "Phone number: " << phone << '\t' << "Email: " << email << '\t' << "City: " << city << endl;
+	}
+
+	void viewKoshnitsa()
+	{
+		cout << "V koshnitsata ti ima: " << endl;
+
+		for (int i = 0; i < koshnitsa.size(); i++)
+		{
+			cout << koshnitsa[i] << endl;
+		}
+	}
+
+	string accessData()
+	{
+		return file_path;
+	}
+
+	int getId() const
+	{
+		return id;
+	}
+
+private:
+	int id;
+	static int nextId;
+	string part; int phone; string email; string city;
+	string file_path = "d:\\data\\klienti.txt";
+	fstream Klienti_Info;
+};
+
+int Klienti::nextId = 1;
+
+class editKlienti
+{
+public:
+	editKlienti() {};
+	~editKlienti() {};
+
+	void addClient(Klienti* object)
+	{
+		klient.push_back(object);
+	}
+
+	void addKoshnitsa(editTehnika object)
+	{
+		int choice;
+		vector <Tehnika*> temp;
+		cout << "Predlagana tehnika: " << endl;
+
+		object.List();
+
+		cin >> choice;
+		choice--;
+
+		temp = object.tech_list;
+
+		klient[0]->koshnitsa.push_back(temp[choice]);
+	}
+
+	void removeKlient()
+	{
+		klient.erase(klient.begin());
+	}
+
+	void removeTehnika()
 	{
 		int choice;
 
-		cout << "<===============MAIN MENU===============>" << endl;;
-		cout << "1. Dobavi produkt.\n2. Mahni produkt\n3. Viz spisaka za produkti.\n0. Izlez ot programata\n";
+		cout << "Kakvo iskate da mahnete ot koshnitsata vi?" << endl;
+
+		vector <Tehnika*> temp = klient[0]->koshnitsa;
+
+		for (int i = 0; i < temp.size(); i++)
+		{
+			cout << i + 1 << ". ";
+			temp[i]->viewTehnika();
+		}
 
 		cin >> choice;
+		choice--;
+		temp.erase(temp.begin() + choice);
 
-		if (choice == 1)
+		klient[0]->koshnitsa = temp;
+	}
+
+	void endOrder()
+	{
+		vector <Tehnika*> temp;
+		double sum = 0;
+
+		temp = klient[0]->koshnitsa;
+
+		cout << "Porychkata vi beshe prikluchena.";
+
+		for (int i = 0; i < temp.size(); i++)
 		{
-			cout << "Kakiv produkt iskash da dobavish?" << endl;
-			cout << "1. Processor\n2.Video karta\n3.Dinna platka\n";
-			cin >> choice;
-			cin.ignore();
-
-			if (choice == 1)
-			{
-				string name;
-				double speed, price;
-				int cores;
-
-				cout << "Ime: "; getline(cin, name);
-				cout << "Skorost: "; cin >> speed;
-				cout << "Yadra: "; cin >> cores;
-				cout << "Cena: "; cin >> price;
-
-				os.Add(new Processor(name, speed, cores, price));
-			}
-
-			else if (choice == 2)
-			{
-				string name;
-				double speed, price;
-				int memory;
-
-				cout << "Ime: "; getline(cin, name);
-				cout << "Skorost: "; cin >> speed;
-				cout << "Pamet: "; cin >> memory;
-				cout << "Cena: "; cin >> price;
-
-				os.Add(new GraphicsCard(name, speed, memory, price));
-			}
-			
-			else if (choice == 3)
-			{
-				string name, socket, chipset, memory_type, form_factor;
-				double price;
-
-				cout << "Ime: "; getline(cin, name);
-				cout << "Soket: "; getline(cin, socket);
-				cout << "Chipset: "; getline(cin, chipset);
-				cout << "Vid pamet: "; getline(cin, memory_type);
-				cout << "Razmer: "; getline(cin, form_factor);
-				cout << "Cena: "; cin >> price;
-
-				os.Add(new Motherboard(name, socket, chipset, memory_type, form_factor, price));
-			}
-		}
-		else if (choice == 2)
-		{
-			os.Remove();
+			sum += temp[i]->getPrice();
 		}
 
-		else if (choice == 3)
-		{
-			os.List();
-		}
+		cout << "Obshtata suma na porichkata vi e: " << sum << " lv." << endl;
 
-		else if (choice == 0) break;
+		klient[0]->koshnitsa.clear();
+	}
+
+	void List()
+	{
+		vector <Tehnika*> temp = klient[0]->koshnitsa;
+
+		cout << "Danni na klienta: ";
+		klient[0]->view();
+
+		for (int i = 0; i < temp.size(); i++)
+		{
+			cout << i + 1 << ". ";
+			temp[i]->viewTehnika();
+		}
+	}
+
+private:
+	vector<Klienti*> klient;
+};
+
+int main()
+{
+	int izb;
+	editTehnika os;
+	editKlienti editKl;
+	os = fetch_data(os);
+	while (true) {
+		cout << "<===============MAIN MENU===============>" << endl;
+		cout << "1. Menu za klient\n2. Menu za razrabotchik\n3. Izhod\n";
+		cin >> izb;
+		cin.ignore(10, '\n');
+		if (izb == 1)
+		{
+
+			string name, email, city;
+			int phone;
+
+			cout << "Name: "; getline(cin, name);
+			cout << "Email: "; getline(cin, email);
+			cout << "City: "; getline(cin, city);
+			cout << "Phone number: "; cin >> phone;
+			cin.ignore(10, '\n');
+
+			editKl.addClient(new Klienti(name, phone, email, city));
+
+			int choiceKl;
+			while (true)
+			{
+				cout << "<===============CLIENT MENU===============>" << endl;
+				cout << "1. Izberi produkt.\n2. Viz spisaka za produkti.\n3. Poruchai product.\n0. Izlez ot programata\n";
+				cin >> choiceKl;
+				if (choiceKl == 0)
+				{
+					break;
+				}
+				else if (choiceKl == 3)
+				{
+					editKl.endOrder();
+				}
+				else if (choiceKl == 2)
+				{
+					editKl.List();
+				}
+				else if (choiceKl == 1)
+				{
+					editKl.addKoshnitsa(os);
+				}
+
+			}
+			break;
+		}
+		if (izb == 2) {
+			int choiceDev;
+			while (true) {
+				cout << "<===============DEVELOPER MENU===============>" << endl;
+				cout << "1. Dobavi produkt.\n2. Mahni produkt\n3. Viz spisaka za produkti.\n0. Izlez ot programata\n";
+				cin >> choiceDev;
+				if (choiceDev == 1) {
+					int choice;
+					cout << "Kakiv produkt iskash da dobavish?" << endl;
+					cout << "1. Processor\n2.Video karta\n3.Dunna platka\n";
+					cin >> choice;
+					cin.ignore();
+
+					if (choice == 1)
+					{
+						string name;
+						double speed, price;
+						int cores;
+
+						cout << "Ime: "; getline(cin, name);
+						cout << "Skorost: "; cin >> speed;
+						cout << "Yadra: "; cin >> cores;
+						cout << "Cena: "; cin >> price;
+						cin.ignore();
+						os.Add(new Processor(name, speed, cores, price));
+					}
+					else if (choice == 2)
+					{
+						string name;
+						double speed, price;
+						int memory;
+
+						cout << "Ime: "; getline(cin, name);
+						cout << "Skorost: "; cin >> speed;
+						cout << "Pamet: "; cin >> memory;
+						cout << "Cena: "; cin >> price;
+						cin.ignore();
+						os.Add(new GraphicsCard(name, speed, memory, price));
+					}
+					else if (choice == 3)
+					{
+						string name, socket, chipset, memory_type, form_factor;
+						double price;
+
+						cout << "Ime: "; getline(cin, name);
+						cout << "Soket: "; getline(cin, socket);
+						cout << "Chipset: "; getline(cin, chipset);
+						cout << "Vid pamet: "; getline(cin, memory_type);
+						cout << "Razmer: "; getline(cin, form_factor);
+						cout << "Cena: "; cin >> price;
+						cin.ignore();
+						os.Add(new Motherboard(name, socket, chipset, memory_type, form_factor, price));
+					}
+				}
+				if (choiceDev == 2) {
+					os.Remove();
+				}
+				if (choiceDev == 3) {
+					os.List();
+				}
+				if (choiceDev == 0) {
+					break;
+				}
+				else {
+					cout << "Nevaliden izbor. Molq opitaite otnovo.\n";
+				}
+			}
+		}
+		if (izb == 3) {
+			break;
+		}
 	}
 }
