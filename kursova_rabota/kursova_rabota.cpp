@@ -5,10 +5,11 @@
 #include <algorithm>
 #include <iomanip>
 #include <exception>
+#include <stdlib.h> 
 
 using namespace std;
 
-bool checkException(int a, int begin_range, int end_range)
+bool checkIntException(int a, int begin_range, int end_range)
 {
 	bool passed = false;
 
@@ -33,6 +34,9 @@ bool checkException(int a, int begin_range, int end_range)
 	catch (const exception& e)
 	{
 		cerr << "Error: " << e.what() << endl;
+		cout << "Natisni Enter za da prodiljish." << endl;
+		cin.get();
+		system("cls");
 	}
 
 	return passed;
@@ -246,14 +250,14 @@ public:
 	//Този метод позволява да се махне избрана от потребителя техника.//
 	void Remove()
 	{
-		
+
 		int choice, id;
 		string line, file_path;
 		vector <string> lines;
 		fstream read_file;
 		ofstream write_file;
 
-	
+
 		while (true)
 		{
 			try
@@ -275,13 +279,13 @@ public:
 
 				cout << "0. Nazad\n";
 
-				
+
 				cin >> choice;
 				cin.ignore(10, '\n');
-				
+
 				if (choice == 0) break;
 
-				else if (choice < -1 && choice > tech_list.size()+1)
+				else if (choice < -1 && choice > tech_list.size() + 1)
 				{
 					throw out_of_range("Chisloto trqbva da e ot " + to_string(0) + " do " + to_string(tech_list.size() + 1));
 				}
@@ -329,6 +333,9 @@ public:
 			catch (const exception& e)
 			{
 				cerr << "Error: " << e.what() << endl;
+				cout << "Natisni Enter za da prodiljish." << endl;
+				cin.get();
+				system("cls");
 				break;
 			}
 		}
@@ -340,22 +347,25 @@ public:
 	{
 		try
 		{
+			if (tech_list.empty())
+			{
+				throw invalid_argument("Nqma dobavena tehnika\n");
+			}
+
 			for (int i = 0; i < tech_list.size(); i++)
 			{
 				cout << i + 1 << ". ";
 				tech_list[i]->viewTehnika();
-			}
-
-			if (tech_list.empty())
-			{
-				throw invalid_argument("Nqma dobavena tehnika\n");
 			}
 		}
 
 		catch (const exception& e)
 		{
 			cerr << "Error: " << e.what() << endl;
-		}	
+			cout << "Natisni Enter za da prodiljish." << endl;
+			cin.get();
+			system("cls");
+		}
 	}
 private:
 };
@@ -453,7 +463,7 @@ public:
 		email = e;
 		city = c;
 
-		int add;
+		int add = 0;
 		string line;
 		vector<string> lines;
 
@@ -474,17 +484,17 @@ public:
 
 		klienti_write.open(file_path, fstream::app);
 
-		klienti_write << id+add << ". " << part << '\t' << phone << '\t' << email << '\t' << city << endl;
+		klienti_write << id + add << ". " << part << '\t' << phone << '\t' << email << '\t' << city << endl;
 
 		klienti_write.close();
-		
+
 	}
 
 	~Klienti() { };
 
 	void view()
 	{
-		cout << "Name: " << part << '\t' << "Phone number: " << phone << '\t' << "Email: " << email << '\t' << "City: " << city << endl;
+		cout << "Ime: " << part << '\t' << "Grad: " << city << '\t' << "Email: " << email << '\t' << "Telefon: " << phone << endl;
 	}
 
 	void viewKoshnitsa()
@@ -536,58 +546,122 @@ public:
 		int choice;
 		int size;
 		bool passed = false;
-		vector <Tehnika*> temp;
+		vector <Tehnika*> temp = object.tech_list;;
 
-		try
+		while (true)
 		{
-			if (object.tech_list.empty())
+			try
 			{
-				throw invalid_argument("Nqma dobavena tehnika.\n");
-			}
 
-			cout << "Predlagana tehnika: " << endl;
+				if (temp.empty())
+				{
+					throw invalid_argument("Nqma dobavena tehnika.\n");
+				}
 
-			object.List();
+				while (!passed)
+				{
+					cout << "Predlagana tehnika: " << endl;
 
-			while (!passed)
-			{
-				cin >> choice;
-				size = object.tech_list.size();
-				passed = checkException(choice, 0, size + 1);
+					object.List();
+
+					cout << "0. Nazad\n";
+
+					cin >> choice;
+					size = temp.size();
+					passed = checkIntException(choice, -1, size + 1);
+				}
+
+				passed = false;
+
+				if (choice == 0)
+				{
+					system("cls");
+					break;
+				}
+
+				system("cls");
+				cout << "Tehnikata beshe dobavena v koshnitsta." << endl;
+				cin.get();
+				cin.ignore(5, '\n');
+				system("cls");
+
 				choice--;
+
+				klient[0]->koshnitsa.push_back(temp[choice]);
 			}
 
-
-			temp = object.tech_list;
-
-			klient[0]->koshnitsa.push_back(temp[choice]);
-		}
-
-		catch (const exception& e)
-		{
-			cerr << "Error: " << e.what() << endl;
+			catch (const exception& e)
+			{
+				cerr << "Error: " << e.what() << endl;
+				cout << "Natisni Enter za da prodiljish." << endl;
+				cin.get();
+				system("cls");
+				break;
+			}
 		}
 	}
 
 	void removeTehnika()
 	{
 		int choice;
-
-		cout << "Kakvo iskate da mahnete ot koshnitsata vi?" << endl;
-
+		bool passed = false;
 		vector <Tehnika*> temp = klient[0]->koshnitsa;
 
-		for (int i = 0; i < temp.size(); i++)
+		while (true)
 		{
-			cout << i + 1 << ". ";
-			temp[i]->viewTehnika();
+			try
+			{
+				if (temp.empty())
+				{
+					throw invalid_argument("Nqma nishto v koshnitsata.");
+				}
+
+				int choice;
+
+				while (!passed)
+				{
+					cout << "Kakvo iskate da mahnete ot koshnitsata vi?" << endl;
+
+					for (int i = 0; i < temp.size(); i++)
+					{
+						cout << i + 1 << ". ";
+						temp[i]->viewTehnika();
+					}
+
+					cout << "0. Nazad\n";
+
+					cin >> choice;
+					passed = checkIntException(choice, -1, temp.size() + 1);
+				}
+
+				passed = false;
+
+				if (choice == 0)
+				{
+					system("cls");
+					break;
+				}
+
+				system("cls");
+				cout << "Tehnikata beshe premahnata ot koshnitsta." << endl;
+				cin.get();
+				system("cls");
+
+				choice--;
+				temp.erase(temp.begin() + choice);
+
+				klient[0]->koshnitsa = temp;
+			}
+
+			catch (const exception& e)
+			{
+				cerr << "Error: " << e.what() << endl;
+				cout << "Natisni Enter za da prodiljish." << endl;
+				cin.get();
+				system("cls");
+				break;
+			}
 		}
-
-		cin >> choice;
-		choice--;
-		temp.erase(temp.begin() + choice);
-
-		klient[0]->koshnitsa = temp;
 	}
 
 	void endOrder()
@@ -602,13 +676,13 @@ public:
 
 		temp = klient[0]->koshnitsa;
 
-		if (temp.empty())
+		try
 		{
-			cout << "Nqma dobavena tehnika v koshnitsta." << endl;
-		}
+			if (temp.empty())
+			{
+				throw invalid_argument("Nqma dobavena tehnika v koshnitsta.");
+			}
 
-		else
-		{
 			cout << "Porychkata vi beshe prikluchena.";
 
 			klient_details = klient[0]->giveDetails();
@@ -639,25 +713,35 @@ public:
 			saveOrder << "<======================================>" << "\n\n";
 
 			cout << "Obshtata suma na porichkata vi e: " << sum << " lv." << endl;
+			cin.get();
+			system("cls");
 
 			saveOrder.close();
 
 			klient[0]->koshnitsa.clear();
 		}
+		catch (const exception& e)
+		{
+			cerr << "Error: " << e.what() << endl;
+			cout << "Natisni Enter za da prodiljish." << endl;
+			cin.get();
+			system("cls");
+		}
+
 	}
 
 	void List()
 	{
 		vector <Tehnika*> temp = klient[0]->koshnitsa;
 
-		if (temp.empty())
+		try
 		{
-			cout << "Koshnitsata e prazna." << endl;
-		}
+			if (temp.empty())
+			{
+				throw invalid_argument("Koshnitsata e prazna.");
+			}
 
-		else
-		{
-			cout << "Danni na klienta: ";
+			cout << "Danni na klienta:\n";
 			klient[0]->view();
 
 			for (int i = 0; i < temp.size(); i++)
@@ -665,6 +749,19 @@ public:
 				cout << i + 1 << ". ";
 				temp[i]->viewTehnika();
 			}
+
+			cout << "\nNatisni Enter za da se virnesh obratno.\n";
+
+			cin.get();
+			system("cls");
+		}
+
+		catch (const exception& e)
+		{
+			cerr << "Error: " << e.what() << endl;
+			cout << "Natisni Enter za da prodiljish." << endl;
+			cin.get();
+			system("cls");
 		}
 	}
 
@@ -680,17 +777,20 @@ int main()
 	editKlienti editKl;
 	os = fetch_data(os);
 	while (true) {
-		cout << "<===============MAIN MENU===============>" << endl;
-		cout << "1. Menu za klient\n2. Menu za razrabotchik\n3. Izlez ot programata\n";
 
 		while (!passed)
 		{
+			cout << "<===============MAIN MENU===============>" << endl;
+			cout << "1. Menu za klient\n2. Menu za razrabotchik\n3. Izlez ot programata\n";
+
 			cin >> izb;
 			cin.ignore(10, '\n');
-			passed = checkException(izb, 0, 4);
+			passed = checkIntException(izb, 0, 4);
 		}
 
 		passed = false;
+
+		system("cls");
 
 		if (izb == 1)
 		{
@@ -711,6 +811,8 @@ int main()
 					string_phone = zero + to_string(phone);
 					cin.ignore(10, '\n');
 
+					system("cls");
+
 					if (cin.fail())
 					{
 						cin.clear();
@@ -730,6 +832,9 @@ int main()
 				catch (const exception& e)
 				{
 					cerr << "Error: " << e.what() << endl;
+					cout << "Natisni Enter za da prodiljish." << endl;
+					cin.get();
+					system("cls");
 				}
 			}
 
@@ -740,30 +845,36 @@ int main()
 
 			while (true)
 			{
-
-				cout << "<===============CLIENT MENU===============>" << endl;
-				cout << "1. Izberi produkt.\n2. Viz spisaka za produkti.\n3. Poruchai product.\n0. Nazad\n";
-
 				while (!passed)
 				{
+
+					cout << "<===============CLIENT MENU===============>" << endl;
+					cout << "1. Izberi produkt.\n2. Mahni produkt\n3. Viz spisaka za produkti.\n4. Poruchai product.\n0. Nazad\n";
+
 					cin >> choiceKl;
 					cin.ignore(10, '\n');
-					passed = checkException(choiceKl, -1, 4);
+					passed = checkIntException(choiceKl, -1, 5);
 				}
 
 				passed = false;
+
+				system("cls");
 
 				if (choiceKl == 0)
 				{
 					break;
 				}
-				else if (choiceKl == 3)
+				else if (choiceKl == 4)
 				{
 					editKl.endOrder();
 				}
-				else if (choiceKl == 2)
+				else if (choiceKl == 3)
 				{
 					editKl.List();
+				}
+				else if (choiceKl == 2)
+				{
+					editKl.removeTehnika();
 				}
 				else if (choiceKl == 1)
 				{
@@ -783,7 +894,7 @@ int main()
 				{
 					cin >> choiceDev;
 					cin.ignore(10, '\n');
-					passed = checkException(choiceDev, -1, 4);
+					passed = checkIntException(choiceDev, -1, 4);
 				}
 
 				passed = false;
@@ -799,7 +910,7 @@ int main()
 						{
 							cin >> choice;
 							cin.ignore(10, '\n');
-							passed = checkException(choice, -1, 4);
+							passed = checkIntException(choice, -1, 4);
 						}
 
 						passed = false;
@@ -846,7 +957,7 @@ int main()
 						}
 						else if (choice == 0) break;
 					}
-					
+
 				}
 				else if (choiceDev == 2) {
 					os.Remove();
