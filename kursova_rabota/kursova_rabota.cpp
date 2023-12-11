@@ -4,9 +4,9 @@
 #include <fstream>
 #include <algorithm>
 #include <iomanip>
+#include <exception>
 
 using namespace std;
-
 
 class Tehnika
 {
@@ -466,6 +466,8 @@ public:
 
 	void endOrder()
 	{
+		ofstream saveOrder;
+		saveOrder.open("d:\\data\\orders.txt");
 		vector <Tehnika*> temp;
 		double sum = 0;
 
@@ -479,6 +481,11 @@ public:
 		}
 
 		cout << "Obshtata suma na porichkata vi e: " << sum << " lv." << endl;
+
+		for (vector<Tehnika*>::iterator it = temp.begin(); it != temp.end(); it++)
+		{
+			saveOrder << *it;
+		}
 
 		klient[0]->koshnitsa.clear();
 	}
@@ -510,11 +517,39 @@ int main()
 	while (true) {
 		cout << "<===============MAIN MENU===============>" << endl;
 		cout << "1. Menu za klient\n2. Menu za razrabotchik\n3. Izhod\n";
-		cin >> izb;
-		cin.ignore(10, '\n');
+		
+		while (true)
+		{
+			try
+			{
+				cin >> izb;
+				cin.ignore(10, '\n');
+
+				if (izb > 0 && izb < 4)
+				{
+					break;
+				}
+				else if (cin.fail())
+				{
+					cin.clear();
+					cin.ignore(numeric_limits<std::streamsize>::max(), '\n');
+					throw invalid_argument("Greshen vhod. Trqbva da e chislo");
+				}
+				else
+				{
+					throw out_of_range("Greshen vhod. Chisloto trqbva da ot 1 do 3");
+				}
+			}
+
+			catch (const exception& e)
+			{
+				cerr << "Error: " << e.what() << endl;
+			}
+		}
+		
 		if (izb == 1)
 		{
-
+			
 			string name, email, city;
 			int phone;
 
@@ -523,12 +558,15 @@ int main()
 			cout << "City: "; getline(cin, city);
 			cout << "Phone number: "; cin >> phone;
 			cin.ignore(10, '\n');
+			
 
 			editKl.addClient(new Klienti(name, phone, email, city));
 
 			int choiceKl;
+
 			while (true)
 			{
+
 				cout << "<===============CLIENT MENU===============>" << endl;
 				cout << "1. Izberi produkt.\n2. Viz spisaka za produkti.\n3. Poruchai product.\n0. Izlez ot programata\n";
 				cin >> choiceKl;
@@ -550,7 +588,6 @@ int main()
 				}
 
 			}
-			break;
 		}
 		if (izb == 2) {
 			int choiceDev;
