@@ -555,7 +555,7 @@ public:
 		int choice;
 		int size;
 		bool passed = false;
-		vector <Tehnika*> temp = object.tech_list;;
+		vector <Tehnika*> temp = object.tech_list;
 
 		while (true)
 		{
@@ -571,7 +571,13 @@ public:
 				{
 					cout << "Predlagana tehnika: " << endl;
 
-					object.List();
+					
+					for (int i = 0; i < temp.size(); i++)
+					{
+						cout << i+1 << ". ";
+						temp[i]->viewTehnika();
+					}
+					
 
 					cout << "0. Nazad\n";
 
