@@ -6,6 +6,7 @@
 #include <iomanip>
 #include <exception>
 #include <stdlib.h> 
+#include <limits>
 
 using namespace std;
 
@@ -251,15 +252,16 @@ public:
 	void Remove()
 	{
 
-		int choice, id;
+		int choice = 0, id;
 		string line, file_path;
 		vector <string> lines;
 		fstream read_file;
 		ofstream write_file;
-
+		bool passed = false;
 
 		while (true)
 		{
+			//Това е за обработка на изключения в метода Remove.//
 			try
 			{
 				if (tech_list.empty())
@@ -267,28 +269,29 @@ public:
 					throw invalid_argument("Nqma produkti za mahane.\n");
 				}
 
-				cout << "Kakvo iskash da mahnesh ot bazata za danni?" << endl;
 
-				//Тука нареждаме всичките компоненти, които сме добавили чрез програмата.//
-
-				for (int i = 0; i < tech_list.size(); i++)
+				while (!passed)
 				{
-					cout << i + 1 << ". ";
-					tech_list[i]->viewTehnika();
+					cout << "Kakvo iskash da mahnesh ot bazata za danni?" << endl;
+
+					//Тука нареждаме всичките компоненти, които сме добавили чрез програмата.//
+
+					for (int i = 0; i < tech_list.size(); i++)
+					{
+						cout << i + 1 << ". ";
+						tech_list[i]->viewTehnika();
+					}
+
+					cout << "0. Nazad\n";
+
+					cin >> choice;
+					cin.ignore();
+					passed = checkIntException(choice, -1, tech_list.size()+1);
 				}
-
-				cout << "0. Nazad\n";
-
-
-				cin >> choice;
-				cin.ignore(10, '\n');
+				
+				passed = false;
 
 				if (choice == 0) break;
-
-				else if (choice < -1 && choice > tech_list.size() + 1)
-				{
-					throw out_of_range("Chisloto trqbva da e ot " + to_string(0) + " do " + to_string(tech_list.size() + 1));
-				}
 
 				choice--;
 
@@ -325,6 +328,7 @@ public:
 					write_file << lines[i] << endl;
 				}
 
+				system("cls");
 
 				lines.clear();
 				write_file.close();
@@ -357,6 +361,11 @@ public:
 				cout << i + 1 << ". ";
 				tech_list[i]->viewTehnika();
 			}
+
+			cout << "\nNatisni Enter za da se virnesh obratno.\n";
+
+			cin.get();
+			system("cls");
 		}
 
 		catch (const exception& e)
@@ -603,7 +612,7 @@ public:
 
 	void removeTehnika()
 	{
-		int choice;
+		int choice = 0;
 		bool passed = false;
 		vector <Tehnika*> temp = klient[0]->koshnitsa;
 
@@ -615,8 +624,6 @@ public:
 				{
 					throw invalid_argument("Nqma nishto v koshnitsata.");
 				}
-
-				int choice;
 
 				while (!passed)
 				{
@@ -817,6 +824,12 @@ int main()
 					{
 						cin.clear();
 						cin.ignore(numeric_limits<std::streamsize>::max(), '\n');
+
+						if (phone == INT_MAX || phone == INT_MIN)
+						{
+							throw out_of_range("Greshen vhod. Nevaliden nomer");
+						}
+
 						throw invalid_argument("Greshen vhod. Trqbva da e chislo");
 					}
 					else if (string_phone.size() != 10)
@@ -886,16 +899,19 @@ int main()
 		if (izb == 2) {
 			int choiceDev;
 			while (true) {
-				cout << "<===============DEVELOPER MENU===============>" << endl;
-				cout << "1. Dobavi produkt.\n2. Mahni produkt\n3. Viz spisaka za produkti.\n0. Nazad\n";
-
 
 				while (!passed)
 				{
+					cout << "<===============DEVELOPER MENU===============>" << endl;
+					cout << "1. Dobavi produkt.\n2. Mahni produkt\n3. Viz spisaka za produkti.\n0. Nazad\n";
+
+
 					cin >> choiceDev;
-					cin.ignore(10, '\n');
+					cin.ignore();
 					passed = checkIntException(choiceDev, -1, 4);
 				}
+
+				system("cls");
 
 				passed = false;
 
@@ -903,42 +919,103 @@ int main()
 					while (true)
 					{
 						int choice;
-						cout << "Kakiv produkt iskash da dobavish?" << endl;
-						cout << "1. Processor\n2. Video karta\n3. Dunna platka\n0. Nazad\n";
+						string name;
+						double price;
 
 						while (!passed)
 						{
+							cout << "Kakiv produkt iskash da dobavish?" << endl;
+							cout << "1. Processor\n2. Video karta\n3. Dunna platka\n0. Nazad\n";
 							cin >> choice;
 							cin.ignore(10, '\n');
 							passed = checkIntException(choice, -1, 4);
 						}
 
+						system("cls");
+
 						passed = false;
 
 						if (choice == 1)
 						{
-							string name;
-							double speed, price;
+							double speed;
 							int cores;
 
 							cout << "Ime: "; getline(cin, name);
-							cout << "Skorost: "; cin >> speed;
-							cout << "Yadra: "; cin >> cores;
-							cout << "Cena: "; cin >> price;
-							cin.ignore();
+
+							while (!passed)
+							{
+								cout << "Skorost: ";
+								cin >> speed;
+								cin.ignore();
+								passed = checkIntException(speed, 0, 10);
+							}
+
+							passed = false;
+
+							while (!passed)
+							{
+								cout << "Yadra: ";
+								cin >> cores;
+								cin.ignore();
+								passed = checkIntException(cores, 0, 100);
+							}
+
+							passed = false;
+
+							while (!passed)
+							{
+								cout << "Cena: ";
+								cin >> price;
+								cin.ignore();
+								passed = checkIntException(price, 0, numeric_limits<int>::max());
+							}
+							
+							system("cls");
+
+							passed = false;
+
 							os.Add(new Processor(name, speed, cores, price));
 						}
 						else if (choice == 2)
 						{
-							string name;
-							double speed, price;
+							double speed;
 							int memory;
 
-							cout << "Ime: "; getline(cin, name);
-							cout << "Skorost: "; cin >> speed;
-							cout << "Pamet: "; cin >> memory;
-							cout << "Cena: "; cin >> price;
-							cin.ignore();
+							cout << "Ime: ";
+							getline(cin, name);
+
+							while (!passed)
+							{
+								cout << "Skorost: ";
+								cin >> speed;
+								cin.ignore();
+								passed = checkIntException(speed, 0, 10);
+							}
+
+							passed = false;
+
+							while (!passed)
+							{
+								cout << "Pamet: ";
+								cin >> memory;
+								cin.ignore();
+								passed = checkIntException(memory, 0, 100);
+							}
+
+							passed = false;
+
+							while (!passed)
+							{
+								cout << "Cena: ";
+								cin >> price;
+								cin.ignore();
+								passed = checkIntException(price, 0, numeric_limits<int>::max());
+							}
+
+							system("cls");
+
+							passed = false;
+
 							os.Add(new GraphicsCard(name, speed, memory, price));
 						}
 						else if (choice == 3)
@@ -947,12 +1024,24 @@ int main()
 							double price;
 
 							cout << "Ime: "; getline(cin, name);
+
 							cout << "Soket: "; getline(cin, socket);
 							cout << "Chipset: "; getline(cin, chipset);
 							cout << "Vid pamet: "; getline(cin, memory_type);
 							cout << "Razmer: "; getline(cin, form_factor);
-							cout << "Cena: "; cin >> price;
-							cin.ignore();
+							
+							while (!passed)
+							{
+								cout << "Cena: ";
+								cin >> price;
+								cin.ignore();
+								passed = checkIntException(price, 0, numeric_limits<int>::max());
+							}
+
+							system("cls");
+
+							passed = false;
+
 							os.Add(new Motherboard(name, socket, chipset, memory_type, form_factor, price));
 						}
 						else if (choice == 0) break;
