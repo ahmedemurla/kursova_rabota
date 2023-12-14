@@ -114,7 +114,7 @@ public:
 
 private:
 	static int nextId;
-	string part; double speed, price; int cores;
+	double speed; int cores;
 	string file_path = "d:\\data\\processor_info.txt";
 	fstream processor_info;
 };
@@ -170,7 +170,7 @@ public:
 
 private:
 	static int nextId;
-	string part; double speed, price; int memory;
+	double speed; int memory;
 	string file_path = "d:\\data\\graphics_info.txt";
 	fstream graphics_info;
 };
@@ -227,8 +227,7 @@ public:
 
 private:
 	static int nextId;
-	string part, socket, chipset, memory_type, form_factor;
-	double price;
+	string socket, chipset, memory_type, form_factor;
 	string file_path = "d:\\data\\mobo_info.txt";
 	fstream mobo_info;
 };
@@ -339,10 +338,11 @@ public:
 				cerr << "Error: " << e.what() << endl;
 				cout << "Natisni Enter za da prodiljish." << endl;
 				cin.get();
-				system("cls");
 				break;
 			}
 		}
+
+		system("cls");
 	}
 
 	//Нарежда всики добавени компоненти//
